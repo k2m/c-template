@@ -1,8 +1,11 @@
 #pragma once
+#include <stdint.h>
 #include <ctype.h>
 #include <assert.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define assert_equal        assert_equal_int
 #define assert_not_equal    assert_not_equal_int

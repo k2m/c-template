@@ -1,4 +1,13 @@
 objs/
 *.o
 *.d
+coverage/
+*.gcov
+*.gcno
+*.gcda
+coverage.info
+*.swp
+*.swo
+
 template
+module

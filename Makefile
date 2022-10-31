@@ -3,10 +3,11 @@ SRCS ?= $(wildcard *.c)
 OBJS := $(SRCS:%.c=$(OBJDIR)/%.o)
 DEPS := $(SRCS:%.c=$(OBJDIR)/%.d)
 INC=-Iinclude/
-CFLAGS=-MD -MP -c $(INC)
+COMMONCFLAGS= -c $(INC)
+CFLAGS=-MD -MP $(COMMONCFLAGS)
 LDFLAGS=
 LIBS=
-Q=
+Q?=
 
 CC=gcc
 
@@ -25,8 +26,13 @@ compile: $(OBJS)
 $(APP): compile
 	$(Q)$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
+include Makefile.unittest
+
 cscope:
 	cscope -Rbq
 clean:
-	rm -f $(OBJS) $(DEPS) $(APP)
+	@rm -f $(OBJS) $(DEPS) $(APP)
+	@make -C $(UNITTESTDIR) -f gcov.mk clean
+	@rm -f $(UNITTEST_APPS)
+
 -include $(DEPS)

@@ -1,0 +1,26 @@
+
+UNITTESTDIR=unittests
+UNITTEST_SRCS=$(wildcard unittests/*.c)
+UNITTEST_OBJS=$(UNITTEST_SRCS:%.c=$(UNITTESTDIR)/%.o)
+UNITTEST_APPS=$(UNITTEST_SRCS:%.c=%)
+SRCS_but_main=$(filter-out main.c, $(SRCS))
+UNITTEST_GCDAS   =$(SRCS_but_main:%.c=$(UNITTESTDIR)/org_%.gcda)
+UNITTEST_GCNOS   =$(SRCS_but_main:%.c=$(UNITTESTDIR)/org_%.gcno)
+UNITTEST_MOD_OBJS=$(SRCS_but_main:%.c=$(UNITTESTDIR)/org_%.o)
+UNITTEST_CFLAGS=$(COMMONCFLAGS) --coverage -g
+UNITTEST_LDFLAGS=--coverage
+
+$(UNITTEST_MOD_OBJS):  $(UNITTESTDIR)/org_%.o: %.c
+	gcc -c -o $@ $(UNITTEST_CFLAGS) $<
+
+$(UNITTEST_OBJS):  $(UNITTESTDIR)/%.o: $(UNITTESTDIR)/%.c
+	gcc -c -o $@ $(UNITTEST_CFLAGS) $<
+
+$(UNITTEST_APPS): $(UNITTESTDIR)/%: $(UNITTESTDIR)/%.o $(UNITTESTDIR)/org_%.o
+	gcc -o $@ $? $(UNITTEST_LDFLAGS)
+	./$@
+
+unittest: $(UNITTEST_APPS)
+	make -C $(UNITTESTDIR) -f gcov.mk
+
+.PHONY: unittest $(UNITTEST_APPS)

@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define assert_equal        assert_equal_int
 #define assert_not_equal    assert_not_equal_int
@@ -78,12 +79,15 @@
         exit(1); \
     } while (0)
 
+static char * _func_in_unittest = NULL;
 
 #define run_test(func) \
     do { \
         if (fork() == 0) { \
+            _func_in_unittest = #func ; \
             func; \
             printf("Done: %s\n", #func); \
+            _func_in_unittest = NULL; \
             exit(0); \
         } else { \
             int status; \
@@ -97,3 +101,16 @@
         int status; \
         wait(&status); \
     } while(0)
+
+static void segv_handler (int signal_number)
+{
+    fprintf(stderr, "Segmentation Fault @ %s\n", _func_in_unittest ? _func_in_unittest : "");
+    exit(-1);
+}
+
+#define _setup()  { \
+    struct sigaction sa; \
+    memset(&sa, 0, sizeof(sa)); \
+    sa.sa_handler = &segv_handler; \
+    sigaction(SIGSEGV, &sa, NULL); \
+}
